@@ -1,0 +1,81 @@
+#include "WiFi.h"
+#include "esp_camera.h"
+#include "esp_http_server.h"
+
+// Definir as credenciais da rede WiFi local
+const char* ssid = "NOME_DA_REDE";
+const char* password = "SENHA_DA_REDE";
+
+// Definir as credenciais do servidor
+const char* server_name = "CAMERA_DE_SEGURANCA";
+const int server_port = 80;
+
+// Inicializar a câmera
+camera_config_t config;
+void init_camera() {
+  config.ledc_timer = LEDC_TIMER_0;
+  config.ledc_channel = LEDC_CHANNEL_0;
+  config.pixel_format = PIXFORMAT_JPEG;
+  config.frame_size = FRAMESIZE_QVGA;
+  config.jpeg_quality = 10;
+  config.fb_count = 2;
+  esp_camera_init(&config);
+}
+
+// Configurar o servidor web
+httpd_handle_t server = NULL;
+void start_webserver() {
+  httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+  config.server_port = server_port;
+  server = httpd_start(&config);
+}
+
+// Tratar as requisições do servidor web
+esp_err_t capture_handler(httpd_req_t *req) {
+  camera_fb_t *fb = esp_camera_fb_get();
+  if (fb) {
+    httpd_resp_set_type(req, "image/jpeg");
+    httpd_resp_set_hdr(req, "Content-Disposition", "inline; filename=capture.jpg");
+    httpd_resp_send(req, (const char *)fb->buf, fb->len);
+    esp_camera_fb_return(fb);
+    return ESP_OK;
+  } else {
+    httpd_resp_send_500(req);
+    return ESP_FAIL;
+  }
+}
+
+void setup() {
+  // Inicializar a comunicação serial
+  Serial.begin(115200);
+
+  // Conectar ao WiFi local
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Conectando ao WiFi...");
+  }
+
+  // Inicializar a câmera
+  init_camera();
+
+  // Configurar as rotas do servidor web
+  httpd_uri_t capture_uri = {
+    .uri       = "/capture",
+    .method    = HTTP_GET,
+    .handler   = capture_handler,
+    .user_ctx  = NULL
+  };
+  httpd_register_uri_handler(server, &capture_uri);
+
+  // Iniciar o servidor web
+  start_webserver();
+
+  Serial.println("Câmera de segurança iniciada!");
+}
+
+void loop() {
+  // Não é necessário implementar nada no loop para a câmera de segurança.
+}
+
+Este código inicializa a câmera, configura o servidor web e trata as requisições do servidor para enviar o vídeo ao vivo da câmera. Para visualizar o vídeo ao vivo, basta acessar o endereço IP do ESP32 na rede local a partir de um navegador da web. Por exemplo, se o endereço IP do ESP32 for 192.168.0.100, você pode acessar o vídeo ao vivo da câmera digitando `http://192.168.0.100/c

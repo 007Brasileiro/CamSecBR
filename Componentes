@@ -1,0 +1,9 @@
+Módulo ESP32: este é o coração do projeto e será responsável por controlar a câmera e transmitir o vídeo ao vivo pela rede local.
+
+Câmera: você precisará de uma câmera compatível com o módulo ESP32. Algumas opções populares incluem a OV2640 e a OV3660.
+
+Módulo de alimentação: para alimentar o módulo ESP32 e a câmera, você pode usar uma fonte de alimentação externa ou um módulo de alimentação como o LM2596.
+
+Cabos e conectores: você precisará de alguns cabos e conectores para conectar a câmera ao módulo ESP32 e ao módulo de alimentação.
+
+Outros componentes opcionais: dependendo do seu projeto, você pode querer adicionar outros componentes, como LEDs para indicar o status da câmera ou um sensor de movimento para ativar a gravação de vídeo quando houver movimento detectado.
